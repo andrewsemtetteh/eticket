@@ -1,26 +1,205 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Orà duku – black, oily, smooth, premium. All UI should use these tokens. */
+  --background: #000000;
+  --foreground: #e8e6e3;
+  --foreground-muted: #9c9892;
+  --surface: #0a0a0a;
+  --surface-hover: #111111;
+  --border: #1a1a1a;
+  --radius: 5px;
+  --accent: #c9b896;
+  --accent-hover: #d4c9a8;
+  /* RGB components for use in rgba() shadows and overlays */
+  --accent-rgb: 201, 184, 150;
+  --accent-hover-rgb: 212, 201, 168;
+  /* Primary CTA button shadows – theme-aware */
+  --btn-accent-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.2),
+    0 4px 20px -4px rgba(var(--accent-rgb), 0.25);
+  --btn-accent-shadow-hover: 0 0 0 1px rgba(var(--accent-hover-rgb), 0.4),
+    0 8px 28px -6px rgba(var(--accent-rgb), 0.35);
+  /* Sheen overlay (body::before) – theme-aware */
+  --sheen-highlight: rgba(255, 255, 255, 0.04);
+  --sheen-subtle: rgba(255, 255, 255, 0.02);
+  /* Social icons – brand + theme; X uses foreground for consistency */
+  --social-instagram: #e4405f;
+  --social-facebook: #1877f2;
+  --social-linkedin: #0a66c2;
+  --social-x: var(--foreground);
+  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-social-instagram: var(--social-instagram);
+  --color-social-facebook: var(--social-facebook);
+  --color-social-linkedin: var(--social-linkedin);
+  --color-social-x: var(--social-x);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-logo-primary: var(--font-logo-primary);
+  --font-logo-sup: var(--font-logo-sup);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+  height: 100%;
 }
 
 body {
+  min-height: 100%;
+  height: 100%;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Event title – Lora italic (stylish serif) */
+.font-event-title {
+  font-family: var(--font-logo-sup), Georgia, serif;
+}
+
+/* Oily, premium sheen – subtle gradient overlay on black */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(
+      ellipse 120% 80% at 50% -20%,
+      var(--sheen-highlight) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 100% 100% at 80% 100%,
+      var(--sheen-subtle) 0%,
+      transparent 40%
+    );
+  pointer-events: none;
+}
+
+.app-shell {
+  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Subtle transitions – menus, cards, buttons */
+.ora-transition {
+  transition: color 0.2s var(--ease-out), background-color 0.2s var(--ease-out),
+    border-color 0.2s var(--ease-out), opacity 0.2s var(--ease-out),
+    transform 0.3s var(--ease-in-out);
+}
+
+.ora-card {
+  border-radius: var(--radius);
+  transition: border-color 0.2s var(--ease-out),
+    background-color 0.2s var(--ease-out);
+}
+
+.ora-btn {
+  transition: background-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+}
+
+/* Menu overlay enter/leave */
+.ora-menu-enter {
+  opacity: 0;
+}
+.ora-menu-enter-active {
+  opacity: 1;
+  transition: opacity 0.25s var(--ease-out);
+}
+.ora-menu-exit {
+  opacity: 1;
+}
+.ora-menu-exit-active {
+  opacity: 0;
+  transition: opacity 0.2s var(--ease-out);
+}
+
+@keyframes ora-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.ora-menu-link-in {
+  animation: ora-fade-in-up 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+a,
+button {
+  cursor: pointer;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Gradient border button – gradient on element, ::after for inner fill, no rotation */
+.rotating-gradient-border {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50px;
+  cursor: pointer;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 230deg,
+    rgba(255, 255, 255, 0.35) 260deg,
+    rgba(255, 255, 255, 0.7) 290deg,
+    rgba(255, 255, 255, 0.35) 320deg,
+    transparent 360deg
+  );
+}
+/* Inner fill – inset 5px, rounded 45px (50 - 5), leaves gradient visible as 5px border */
+.rotating-gradient-border::after {
+  content: "";
+  display: block;
+  position: absolute;
+  background: var(--color-button-fill, var(--accent));
+  inset: 5px;
+  border-radius: 45px;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+.rotating-gradient-border-inner {
+  position: relative;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-button-text, var(--background));
+  transition: transform 0.2s var(--ease-out);
+}
+.rotating-gradient-border-inner:hover {
+  transform: scale(1.02);
+}
+.rotating-gradient-border-inner:active {
+  transform: scale(0.98);
 }
