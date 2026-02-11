@@ -15,6 +15,7 @@ declare global {
         metadata?: any;
         callback: (response: any) => void;
         onClose: () => void;
+        cancel_action?: string;
       }) => {
         openIframe: () => void;
       };
@@ -31,6 +32,7 @@ interface PaystackCheckoutProps {
   quantity: number;
   onSuccess: (reference: string) => void;
   onError: (error: string) => void;
+  onCancel?: () => void;
 }
 
 export default function PaystackCheckout({
@@ -41,7 +43,8 @@ export default function PaystackCheckout({
   ticketType,
   quantity,
   onSuccess,
-  onError
+  onError,
+  onCancel
 }: PaystackCheckoutProps) {
   const [loading, setLoading] = useState(false);
   const [scriptLoaded, setScriptLoaded] = useState(false);
@@ -136,6 +139,10 @@ export default function PaystackCheckout({
           setLoading(false);
           if (paymentStatus === 'processing') {
             setPaymentStatus('idle');
+            // Handle payment cancellation
+            if (onCancel) {
+              onCancel();
+            }
           }
         }
       });

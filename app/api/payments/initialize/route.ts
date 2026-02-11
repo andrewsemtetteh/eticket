@@ -85,11 +85,14 @@ export async function POST(request: NextRequest) {
       amount,
       reference,
       callback_url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/payments/callback`,
+      cancel_action: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout?cancelled=true&reference=${reference}`,
+      channels: ['card', 'bank', 'ussd', 'qr', 'mobile_money', 'bank_transfer'],
       metadata: {
         user_id: user.id,
         payment_id: payment.id,
         ticket_type: ticketType,
         quantity,
+        cancel_action: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout?cancelled=true&reference=${reference}`
       }
     });
 

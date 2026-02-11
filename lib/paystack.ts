@@ -84,6 +84,8 @@ export class PaystackService {
     amount: number;
     reference: string;
     callback_url?: string;
+    cancel_action?: string;
+    channels?: string[];
     metadata?: any;
   }): Promise<PaystackInitializeResponse> {
     const response = await fetch(`${this.baseUrl}/transaction/initialize`, {
