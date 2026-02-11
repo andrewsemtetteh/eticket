@@ -83,7 +83,7 @@ export default function MenuOverlay({ isOpen, onClose }: MenuOverlayProps) {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-col bg-[var(--background)] transition-opacity duration-200 ease-out ${mounted ? "opacity-100" : "opacity-0"}`}
+      className={`fixed inset-0 z-50 flex flex-col bg-[var(--background)] transition-opacity duration-300 ease-out ${mounted ? "opacity-100" : "opacity-0"}`}
       role="dialog"
       aria-modal="true"
       aria-label="Navigation menu"
@@ -139,10 +139,10 @@ export default function MenuOverlay({ isOpen, onClose }: MenuOverlayProps) {
         <button
           type="button"
           onClick={onClose}
-          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[var(--radius)] border border-[var(--foreground)] bg-transparent text-[var(--foreground)] ora-btn hover:border-[var(--accent)] hover:text-[var(--accent)] sm:h-11 sm:w-11"
+          className="flex cursor-pointer items-center justify-center text-[var(--foreground)] ora-btn hover:text-[var(--accent)] transition-colors duration-300"
           aria-label="Close menu"
         >
-          <span className="text-xl font-normal leading-none text-[var(--foreground)] sm:text-2xl">&times;</span>
+          <span className="text-3xl font-normal leading-none text-[var(--foreground)] sm:text-4xl transition-colors duration-300">&times;</span>
         </button>
       </div>
     </div>

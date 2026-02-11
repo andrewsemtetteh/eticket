@@ -1,19 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-
-const EVENT_DATE = new Date("2026-04-25T17:00:00"); // 25 April 2026, 5pm
-
-function useDaysUntil(target: Date): number {
-  return useMemo(() => {
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const t = new Date(target);
-    t.setHours(0, 0, 0, 0);
-    const diff = t.getTime() - now.getTime();
-    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-  }, [target]);
-}
+import { useState, useEffect } from "react";
+import CountdownTimer from "./CountdownTimer";
 
 /* Social links – icon colors come from theme (globals.css --social-*) */
 const SOCIAL_HANDLE = "ora_duku";
@@ -79,38 +67,91 @@ const SOCIAL_LINKS = [
 ] as const;
 
 export default function Footer() {
-  const daysUntil = useDaysUntil(EVENT_DATE);
+  const [eventDate, setEventDate] = useState<Date | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEventDate = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        const data = await response.json();
+        
+        if (response.ok && data.settings) {
+          // Combine event_date and event_time from settings
+          const dateStr = data.settings.event_date || "April 25, 2026";
+          const timeStr = data.settings.event_time || "6:00 PM";
+          
+          // Parse the date and time
+          const eventDateTime = new Date(`${dateStr} ${timeStr}`);
+          
+          // Fallback to hardcoded date if parsing fails
+          if (isNaN(eventDateTime.getTime())) {
+            setEventDate(new Date("2026-04-25T18:00:00"));
+          } else {
+            setEventDate(eventDateTime);
+          }
+        } else {
+          // Fallback to hardcoded date
+          setEventDate(new Date("2026-04-25T18:00:00"));
+        }
+      } catch (error) {
+        console.error('Failed to fetch event date:', error);
+        // Fallback to hardcoded date
+        setEventDate(new Date("2026-04-25T18:00:00"));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEventDate();
+  }, []);
 
   return (
-    <footer className="absolute bottom-0 left-0 right-0 z-10 flex items-end justify-between px-4 py-5 sm:px-6 sm:py-5 md:px-8 md:gap-8">
+    <footer className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-5 sm:px-6 sm:py-5 md:px-8 md:gap-8">
       <div className="flex items-center gap-4 sm:gap-5 md:gap-6">
-        {SOCIAL_LINKS.map(({ href, aria, icon }) => (
+        {SOCIAL_LINKS.map(({ href, aria, icon }, index) => (
           <a
             key={aria}
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="ora-transition cursor-pointer opacity-90 hover:opacity-100"
+            className="ora-transition cursor-pointer opacity-90 hover:opacity-100 transition-all duration-500 hover:scale-110 hover:-translate-y-1 hover:rotate-12 group"
             aria-label={aria}
+            style={{
+              animationDelay: `${index * 150}ms`,
+              animation: loading ? 'none' : 'socialBounceIn 0.8s ease-out forwards'
+            }}
           >
-            {icon}
+            <div className="transition-all duration-300 group-hover:drop-shadow-lg group-hover:brightness-110">
+              {icon}
+            </div>
           </a>
         ))}
       </div>
       <p className="hidden flex-1 text-center text-xs text-[var(--foreground-muted)] md:block sm:text-sm">
         © {new Date().getFullYear()} All Rights Reserved.
       </p>
-      <div className="inline-grid grid-cols-[min-content] text-right">
-        <span className="text-2xl font-medium tabular-nums text-[var(--foreground)] sm:text-3xl md:text-4xl">
-          {daysUntil}
-        </span>
-        <p
-          className="text-sm text-[var(--foreground-muted)] sm:text-base"
-          style={{ textAlignLast: "justify" }}
-        >
-          {daysUntil === 1 ? "day" : "days"}
-        </p>
-      </div>
+      {!loading && eventDate && <CountdownTimer targetDate={eventDate} />}
+      {loading && (
+        <div className="inline-grid grid-cols-4 gap-1 text-right xs:gap-2 sm:gap-3">
+          <div className="flex flex-col items-center min-w-0">
+            <span className="text-sm font-bold tabular-nums text-[var(--foreground)] xs:text-base sm:text-lg md:text-xl lg:text-2xl">--</span>
+            <p className="text-[10px] text-[var(--foreground-muted)] uppercase tracking-wide xs:text-xs">Days</p>
+          </div>
+          <div className="flex flex-col items-center min-w-0">
+            <span className="text-sm font-bold tabular-nums text-[var(--foreground)] xs:text-base sm:text-lg md:text-xl lg:text-2xl">--</span>
+            <p className="text-[10px] text-[var(--foreground-muted)] uppercase tracking-wide xs:text-xs">Hrs</p>
+          </div>
+          <div className="flex flex-col items-center min-w-0">
+            <span className="text-sm font-bold tabular-nums text-[var(--foreground)] xs:text-base sm:text-lg md:text-xl lg:text-2xl">--</span>
+            <p className="text-[10px] text-[var(--foreground-muted)] uppercase tracking-wide xs:text-xs">Mins</p>
+          </div>
+          <div className="flex flex-col items-center min-w-0">
+            <span className="text-sm font-bold tabular-nums text-[var(--foreground)] xs:text-base sm:text-lg md:text-xl lg:text-2xl">--</span>
+            <p className="text-[10px] text-[var(--foreground-muted)] uppercase tracking-wide xs:text-xs">Secs</p>
+          </div>
+        </div>
+      )}
     </footer>
   );
 }

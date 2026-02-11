@@ -29,7 +29,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       )}
       <Header onMenuOpen={() => setMenuOpen(true)} />
       <MenuOverlay isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
-      <main className="flex min-h-0 flex-1 flex-col pt-[72px] pb-32 sm:pt-20 sm:pb-36 md:pb-40">
+      <main className="flex min-h-0 flex-1 flex-col pt-[72px] pb-[72px] sm:pt-20 sm:pb-20 md:pb-20">
         {children}
       </main>
       {!isAdmin && <Footer />}

@@ -182,7 +182,7 @@ export default function TicketSection() {
           </div>
           <button
             onClick={handleBuyTicket}
-            className="ora-btn mt-5 flex items-center justify-center rounded-2xl bg-[var(--accent)] px-8 py-3.5 text-lg font-medium text-[var(--background)] hover:bg-[var(--accent-hover)] mx-auto"
+            className="ora-btn mt-3 flex items-center justify-center rounded bg-[var(--accent)] px-4 py-2 text-lg font-medium text-[var(--background)] hover:bg-[var(--accent-hover)] mx-auto transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 transform"
           >
             Buy ticket{quantity > 1 ? "s" : ""}
           </button>

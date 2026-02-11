@@ -6,23 +6,41 @@ export default function Contact() {
           Contact
         </h1>
         <p className="mt-2 text-sm text-[var(--foreground-muted)]">
-          For invitations and enquiries
+          Get in touch about the event
         </p>
 
-        <div className="mt-10 space-y-6 border-t border-[var(--border)] pt-8">
-          <p className="text-[var(--foreground)] leading-relaxed">
-            This event is invitation-only. If you have received an invitation
-            code, you may use it at checkout.
-          </p>
-          <p className="text-[var(--foreground-muted)] text-sm">
-            Enquiries:{" "}
-            <a
-              href="mailto:hello@oraduku.com"
-              className="ora-transition hover:text-[var(--accent)]"
-            >
-              hello@oraduku.com
-            </a>
-          </p>
+        <div className="mt-6 space-y-4 border-t border-[var(--border)] pt-4">
+          <div className="space-y-3">
+            <h2 className="text-base font-medium text-[var(--foreground)]">
+              Need Help?
+            </h2>
+            <p className="text-[var(--foreground)] leading-relaxed text-sm">
+              Questions about tickets, the event, or technical issues? 
+              We're here to assist you.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-[var(--foreground-muted)] text-sm">
+              General enquiries:{" "}
+              <a
+                href="mailto:info@oraduku.com"
+                className="ora-transition hover:text-[var(--accent)]"
+              >
+                info@oraduku.com
+              </a>
+            </p>
+            <p className="text-[var(--foreground-muted)] text-sm">
+              Technical support:{" "}
+              <a
+                href="mailto:support@oraduku.com"
+                className="ora-transition hover:text-[var(--accent)]"
+              >
+                support@oraduku.com
+              </a>
+            </p>
+          </div>
+
         </div>
       </div>
     </div>
