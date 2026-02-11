@@ -238,9 +238,9 @@ button:focus-visible {
   animation: rainbow 20s linear infinite;
 }
 
-.rotating-gradient-border::after {
+/* .rotating-gradient-border::after {
   filter: blur(50px);
-}
+} */
 /* Previous gradient button styles for component */
 .gradient-border-button {
   position: relative;
