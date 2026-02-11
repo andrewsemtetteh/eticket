@@ -1,7 +1,7 @@
 export default function About() {
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-start px-6 pb-28 pt-6 sm:px-8 sm:pb-24 md:px-12 md:pb-28">
-      <div className="mx-auto w-full max-w-xl">
+    <div className="flex min-h-full flex-1 flex-col justify-center px-6 pb-28 pt-6 sm:px-8 sm:pb-24 md:px-12 md:pb-28">
+      <div className="mx-auto w-full max-w-xl text-center">
         <h1 className="text-2xl font-medium tracking-tight text-[var(--foreground)] sm:text-3xl">
           About
         </h1>

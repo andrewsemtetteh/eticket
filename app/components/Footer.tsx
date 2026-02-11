@@ -67,8 +67,9 @@ const SOCIAL_LINKS = [
 ] as const;
 
 export default function Footer() {
-  const [eventDate, setEventDate] = useState<Date | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Set default event date immediately to avoid loading state
+  const [eventDate, setEventDate] = useState<Date>(new Date("2026-04-25T18:00:00"));
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchEventDate = async () => {
@@ -84,22 +85,14 @@ export default function Footer() {
           // Parse the date and time
           const eventDateTime = new Date(`${dateStr} ${timeStr}`);
           
-          // Fallback to hardcoded date if parsing fails
-          if (isNaN(eventDateTime.getTime())) {
-            setEventDate(new Date("2026-04-25T18:00:00"));
-          } else {
+          // Only update if parsing succeeds
+          if (!isNaN(eventDateTime.getTime())) {
             setEventDate(eventDateTime);
           }
-        } else {
-          // Fallback to hardcoded date
-          setEventDate(new Date("2026-04-25T18:00:00"));
         }
       } catch (error) {
         console.error('Failed to fetch event date:', error);
-        // Fallback to hardcoded date
-        setEventDate(new Date("2026-04-25T18:00:00"));
-      } finally {
-        setLoading(false);
+        // Keep default date
       }
     };
 
@@ -131,27 +124,7 @@ export default function Footer() {
       <p className="hidden flex-1 text-center text-xs text-[var(--foreground-muted)] md:block sm:text-sm">
         © {new Date().getFullYear()} All Rights Reserved.
       </p>
-      {!loading && eventDate && <CountdownTimer targetDate={eventDate} />}
-      {loading && (
-        <div className="inline-grid grid-cols-4 gap-1 text-right xs:gap-2 sm:gap-3">
-          <div className="flex flex-col items-center min-w-0">
-            <span className="text-sm font-bold tabular-nums text-[var(--foreground)] xs:text-base sm:text-lg md:text-xl lg:text-2xl">--</span>
-            <p className="text-[10px] text-[var(--foreground-muted)] uppercase tracking-wide xs:text-xs">Days</p>
-          </div>
-          <div className="flex flex-col items-center min-w-0">
-            <span className="text-sm font-bold tabular-nums text-[var(--foreground)] xs:text-base sm:text-lg md:text-xl lg:text-2xl">--</span>
-            <p className="text-[10px] text-[var(--foreground-muted)] uppercase tracking-wide xs:text-xs">Hrs</p>
-          </div>
-          <div className="flex flex-col items-center min-w-0">
-            <span className="text-sm font-bold tabular-nums text-[var(--foreground)] xs:text-base sm:text-lg md:text-xl lg:text-2xl">--</span>
-            <p className="text-[10px] text-[var(--foreground-muted)] uppercase tracking-wide xs:text-xs">Mins</p>
-          </div>
-          <div className="flex flex-col items-center min-w-0">
-            <span className="text-sm font-bold tabular-nums text-[var(--foreground)] xs:text-base sm:text-lg md:text-xl lg:text-2xl">--</span>
-            <p className="text-[10px] text-[var(--foreground-muted)] uppercase tracking-wide xs:text-xs">Secs</p>
-          </div>
-        </div>
-      )}
+      <CountdownTimer targetDate={eventDate} />
     </footer>
   );
 }

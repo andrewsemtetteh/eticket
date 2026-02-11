@@ -1,7 +1,7 @@
 export default function Contact() {
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 sm:px-8 md:px-12">
-      <div className="mx-auto w-full max-w-xl">
+      <div className="mx-auto w-full max-w-xl text-center">
         <h1 className="text-2xl font-medium tracking-tight text-[var(--foreground)] sm:text-3xl">
           Contact
         </h1>
@@ -22,16 +22,7 @@ export default function Contact() {
 
           <div className="space-y-2">
             <p className="text-[var(--foreground-muted)] text-sm">
-              General enquiries:{" "}
-              <a
-                href="mailto:info@oraduku.com"
-                className="ora-transition hover:text-[var(--accent)]"
-              >
-                info@oraduku.com
-              </a>
-            </p>
-            <p className="text-[var(--foreground-muted)] text-sm">
-              Technical support:{" "}
+              For enquiries:{" "}
               <a
                 href="mailto:support@oraduku.com"
                 className="ora-transition hover:text-[var(--accent)]"

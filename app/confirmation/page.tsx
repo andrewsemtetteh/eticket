@@ -202,16 +202,9 @@ function ConfirmationContent() {
         )}
 
         <p className="mt-6 text-xs text-[var(--foreground-muted)]">
-          A copy has been sent to {user.email}. You can return to this page anytime
-          using the payment reference: {payment.reference}
+          A copy has been sent to {user.email}. Event location details will be shared via email. 
+          You can return to this page anytime using the payment reference: {payment.reference}
         </p>
-
-        <Link
-          href="/"
-          className="ora-btn mt-8 inline-flex items-center justify-center rounded-[var(--radius)] bg-[var(--accent)] px-5 py-3.5 text-sm font-medium text-[var(--background)] hover:bg-[var(--accent-hover)]"
-        >
-          Back to home
-        </Link>
       </div>
     </div>
   );

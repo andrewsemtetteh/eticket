@@ -57,150 +57,123 @@ const generateTicketHTML = (data: TicketEmailData, isAdmin: boolean = false): st
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ticket Confirmation - ${data.eventTitle}</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a; color: #ffffff;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: transparent; color: #ffffff;">
   <table role="presentation" style="width: 100%; border-collapse: collapse;">
     <tr>
       <td align="center" style="padding: 40px 20px;">
-        <table role="presentation" style="width: 100%; max-width: 600px; border-collapse: collapse; background-color: #1a1a1a; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+        <!-- Premium Ticket Design -->
+        <table role="presentation" style="width: 100%; max-width: 500px; border-collapse: collapse; background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); border: 1px solid #333; position: relative;">
           
-          <!-- Header -->
+          <!-- Ticket Header with Perforated Edge -->
           <tr>
-            <td style="background: linear-gradient(135deg, #C9A227 0%, #E8C547 50%, #C9A227 100%); padding: 30px 40px; text-align: center;">
-              <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #0a0a0a; letter-spacing: 1px;">
-                🎫 E-TICKETS
+            <td style="background: linear-gradient(135deg, #C9A227 0%, #E8C547 50%, #C9A227 100%); padding: 25px 30px; text-align: center; position: relative;">
+              <!-- Perforated edge effect -->
+              <div style="position: absolute; bottom: -8px; left: 0; right: 0; height: 16px; background-image: radial-gradient(circle at 8px 8px, transparent 4px, #C9A227 4px); background-size: 16px 16px;"></div>
+              
+              <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #0a0a0a; letter-spacing: 2px; text-transform: uppercase;">
+                ADMIT ONE
               </h1>
-              <p style="margin: 8px 0 0 0; font-size: 14px; color: #1a1a1a; text-transform: uppercase; letter-spacing: 2px;">
-                ${isAdmin ? 'New Ticket Purchase Notification' : 'Your Ticket Confirmation'}
+              <p style="margin: 5px 0 0 0; font-size: 12px; color: #1a1a1a; font-weight: 600; letter-spacing: 1px;">
+                ${isAdmin ? 'NEW PURCHASE ALERT' : 'TICKET CONFIRMATION'}
               </p>
             </td>
           </tr>
 
-          <!-- Event Banner -->
+          <!-- Main Ticket Body -->
           <tr>
-            <td style="padding: 30px 40px; background-color: #252525; border-bottom: 1px solid #333;">
-              <h2 style="margin: 0 0 10px 0; font-size: 24px; font-weight: 600; color: #C9A227;">
-                ${data.eventTitle}
-              </h2>
-              <p style="margin: 0; font-size: 16px; color: #888;">
-                📅 ${data.eventDate} at ${data.eventTime}
-              </p>
-              <p style="margin: 8px 0 0 0; font-size: 14px; color: #666;">
-                📍 ${data.venueName}, ${data.venueAddress}
-              </p>
-            </td>
-          </tr>
-
-          <!-- Ticket Details -->
-          <tr>
-            <td style="padding: 30px 40px;">
+            <td style="padding: 25px 30px; background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%); position: relative;">
+              <!-- Ticket stub perforation -->
+              <div style="position: absolute; right: -8px; top: 20%; bottom: 20%; width: 16px; background-image: radial-gradient(circle at 8px 8px, transparent 4px, #1a1a1a 4px); background-size: 16px 16px;"></div>
+              
               <table role="presentation" style="width: 100%; border-collapse: collapse;">
                 <tr>
-                  <td style="padding: 20px; background-color: #252525; border-radius: 12px; border-left: 4px solid ${ticketTypeColor};">
-                    <table role="presentation" style="width: 100%; border-collapse: collapse;">
-                      <tr>
-                        <td style="padding-bottom: 15px; border-bottom: 1px dashed #444;">
-                          <span style="display: inline-block; padding: 6px 16px; background-color: ${ticketTypeColor}20; color: ${ticketTypeColor}; font-size: 12px; font-weight: 600; border-radius: 20px; text-transform: uppercase; letter-spacing: 1px;">
-                            ${ticketTypeLabel} Ticket
-                          </span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding-top: 15px;">
-                          <table role="presentation" style="width: 100%; border-collapse: collapse;">
-                            <tr>
-                              <td style="width: 50%; padding: 8px 0;">
-                                <p style="margin: 0; font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px;">Ticket ID</p>
-                                <p style="margin: 4px 0 0 0; font-size: 16px; font-weight: 600; color: #C9A227;">${data.ticketId}</p>
-                              </td>
-                              <td style="width: 50%; padding: 8px 0;">
-                                <p style="margin: 0; font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px;">Quantity</p>
-                                <p style="margin: 4px 0 0 0; font-size: 16px; font-weight: 600; color: #fff;">${data.quantity}</p>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td style="width: 50%; padding: 8px 0;">
-                                <p style="margin: 0; font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px;">Amount Paid</p>
-                                <p style="margin: 4px 0 0 0; font-size: 16px; font-weight: 600; color: #22C55E;">${data.currency} ${data.totalAmount.toFixed(2)}</p>
-                              </td>
-                              <td style="width: 50%; padding: 8px 0;">
-                                <p style="margin: 0; font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px;">Reference</p>
-                                <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: 500; color: #888;">${data.paymentReference}</p>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                    </table>
+                  <!-- Main ticket info -->
+                  <td style="width: 70%; padding-right: 20px; border-right: 2px dashed #444;">
+                    <h2 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 700; color: #C9A227; text-transform: uppercase; letter-spacing: 1px;">
+                      ${data.eventTitle}
+                    </h2>
+                    
+                    <div style="margin: 15px 0; padding: 12px 0; border-top: 1px solid #333; border-bottom: 1px solid #333;">
+                      <p style="margin: 0 0 8px 0; font-size: 14px; color: #fff; font-weight: 600;">
+                        📅 ${data.eventDate} • ${data.eventTime}
+                      </p>
+                      <p style="margin: 0; font-size: 13px; color: #888;">
+                        📍 Location details sent via email
+                      </p>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                      <div style="flex: 1; margin-right: 15px;">
+                        <p style="margin: 0; font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 1px;">TICKET TYPE</p>
+                        <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 600; color: ${ticketTypeColor}; text-transform: uppercase;">${ticketTypeLabel}</p>
+                      </div>
+                      <div style="flex: 1; margin-right: 15px;">
+                        <p style="margin: 0; font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 1px;">QTY</p>
+                        <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 600; color: #fff;">${data.quantity}</p>
+                      </div>
+                      <div style="flex: 1;">
+                        <p style="margin: 0; font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 1px;">TOTAL</p>
+                        <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 600; color: #22C55E;">${data.currency} ${data.totalAmount.toFixed(2)}</p>
+                      </div>
+                    </div>
+                  </td>
+                  
+                  <!-- Ticket stub -->
+                  <td style="width: 30%; padding-left: 20px; text-align: center;">
+                    <div style="transform: rotate(-90deg); white-space: nowrap;">
+                      <p style="margin: 0; font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 2px;">TICKET ID</p>
+                      <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: 700; color: #C9A227; letter-spacing: 1px;">${data.ticketId}</p>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 8px; background-color: #333; border-radius: 8px;">
+                      <p style="margin: 0; font-size: 10px; color: #888; text-transform: uppercase;">REF</p>
+                      <p style="margin: 2px 0 0 0; font-size: 11px; font-weight: 500; color: #fff; word-break: break-all;">${data.paymentReference}</p>
+                    </div>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
 
-          <!-- Customer Details -->
+          <!-- Customer Details Footer -->
           <tr>
-            <td style="padding: 0 40px 30px 40px;">
-              <h3 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 1px;">
-                ${isAdmin ? 'Customer Details' : 'Your Details'}
-              </h3>
-              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #252525; border-radius: 12px; overflow: hidden;">
+            <td style="padding: 20px 30px; background-color: #1a1a1a; border-top: 1px dashed #444;">
+              <table role="presentation" style="width: 100%; border-collapse: collapse;">
                 <tr>
-                  <td style="padding: 15px 20px; border-bottom: 1px solid #333;">
-                    <p style="margin: 0; font-size: 12px; color: #666;">Name</p>
-                    <p style="margin: 4px 0 0 0; font-size: 15px; color: #fff;">${data.customerName}</p>
+                  <td style="width: 50%; padding-right: 15px;">
+                    <p style="margin: 0; font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 1px;">HOLDER</p>
+                    <p style="margin: 2px 0 0 0; font-size: 14px; font-weight: 600; color: #fff;">${data.customerName}</p>
                   </td>
-                </tr>
-                <tr>
-                  <td style="padding: 15px 20px; border-bottom: 1px solid #333;">
-                    <p style="margin: 0; font-size: 12px; color: #666;">Email</p>
-                    <p style="margin: 4px 0 0 0; font-size: 15px; color: #fff;">${data.customerEmail}</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding: 15px 20px;">
-                    <p style="margin: 0; font-size: 12px; color: #666;">Phone</p>
-                    <p style="margin: 4px 0 0 0; font-size: 15px; color: #fff;">${data.customerPhone || 'Not provided'}</p>
+                  <td style="width: 50%; padding-left: 15px;">
+                    <p style="margin: 0; font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 1px;">EMAIL</p>
+                    <p style="margin: 2px 0 0 0; font-size: 12px; font-weight: 500; color: #888; word-break: break-all;">${data.customerEmail}</p>
                   </td>
                 </tr>
               </table>
+              
+              <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #333; text-align: center;">
+                <p style="margin: 0; font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1px;">
+                  Present this ticket at the venue entrance
+                </p>
+              </div>
             </td>
           </tr>
-
           <!-- QR Code Section (for customer only) -->
           ${!isAdmin ? `
           <tr>
-            <td style="padding: 0 40px 30px 40px; text-align: center;">
-              <div style="background-color: #252525; border-radius: 12px; padding: 25px; display: inline-block;">
-                <p style="margin: 0 0 15px 0; font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px;">
-                  Present this ticket at the venue
-                </p>
-                <div style="background-color: #fff; padding: 15px; border-radius: 8px; display: inline-block;">
-                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(data.ticketId)}" alt="QR Code" style="display: block; width: 150px; height: 150px;">
-                </div>
-                <p style="margin: 15px 0 0 0; font-size: 14px; font-weight: 600; color: #C9A227;">
-                  ${data.ticketId}
-                </p>
+            <td style="padding: 25px 30px; background-color: #0a0a0a; text-align: center; border-top: 2px dashed #444;">
+              <p style="margin: 0 0 15px 0; font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 2px;">
+                SCAN AT ENTRANCE
+              </p>
+              <div style="background-color: #fff; padding: 12px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(data.ticketId)}" alt="QR Code" style="display: block; width: 120px; height: 120px;">
               </div>
+              <p style="margin: 12px 0 0 0; font-size: 12px; font-weight: 600; color: #C9A227; letter-spacing: 1px;">
+                ${data.ticketId}
+              </p>
             </td>
           </tr>
           ` : ''}
-
-          <!-- Important Notes -->
-          <tr>
-            <td style="padding: 0 40px 30px 40px;">
-              <div style="background-color: #1E3A5F; border-radius: 12px; padding: 20px; border-left: 4px solid #3B82F6;">
-                <h4 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 600; color: #60A5FA;">
-                  📋 Important Information
-                </h4>
-                <ul style="margin: 0; padding: 0 0 0 20px; font-size: 13px; color: #93C5FD; line-height: 1.8;">
-                  <li>Please arrive at least 30 minutes before the event starts</li>
-                  <li>Present this email or QR code at the entrance</li>
-                  <li>This ticket is non-refundable and non-transferable</li>
-                  <li>For inquiries, contact us at support@etickets.com</li>
-                </ul>
-              </div>
-            </td>
-          </tr>
 
           <!-- Footer -->
           <tr>

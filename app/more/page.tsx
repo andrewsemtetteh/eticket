@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function More() {
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 sm:px-8 md:px-12">
-      <div className="mx-auto w-full max-w-xl">
+      <div className="mx-auto w-full max-w-xl text-center">
         <h1 className="text-2xl font-medium tracking-tight text-[var(--foreground)] sm:text-3xl">
           More
         </h1>
@@ -15,7 +15,8 @@ export default function More() {
           <p className="text-[var(--foreground)] leading-relaxed">
             E-tickets are sent by email and SMS after payment. Present your
             ticket (QR code) at the door. Bank cards and mobile money (MTN,
-            Vodafone/Telecel, AirtelTigo) are accepted.
+            Vodafone/Telecel, AirtelTigo) are accepted. Event location details
+            will be shared via email after ticket purchase.
           </p>
           <Link
             href="/tickets"
