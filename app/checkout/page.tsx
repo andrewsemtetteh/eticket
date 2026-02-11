@@ -1,49 +1,104 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
+import PaystackCheckout from "@/components/PaystackCheckout";
 
-const EARLY_BIRD_PRICE = 80;
-const GENERAL_PRICE = 120;
+interface EventSettings {
+  early_bird_price: number;
+  general_price: number;
+  early_bird_limit: number;
+  early_bird_end_date: string;
+}
 
-const PAYMENT_METHODS = [
-  { id: "card", label: "Bank card", desc: "Visa, Mastercard, local cards" },
-  { id: "mtn", label: "MTN Mobile Money", desc: undefined },
-  { id: "vodafone", label: "Vodafone / Telecel", desc: undefined },
-  { id: "airteltigo", label: "AirtelTigo", desc: undefined },
-] as const;
+interface EventStats {
+  earlyBirdSold: number;
+  generalSold: number;
+  totalSold: number;
+  earlyBirdLeft: number;
+  earlyBirdAvailable: boolean;
+}
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const type = (searchParams.get("type") || "early-bird") as "early-bird" | "general";
   const qty = Math.min(10, Math.max(1, Number(searchParams.get("qty")) || 1));
 
-  const price = type === "early-bird" ? EARLY_BIRD_PRICE : GENERAL_PRICE;
-  const total = price * qty;
-  const [method, setMethod] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
+  const [settings, setSettings] = useState<EventSettings | null>(null);
+  const [stats, setStats] = useState<EventStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    email: '',
+    name: '',
+    phone: ''
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
+  useEffect(() => {
+    fetchEventSettings();
+  }, []);
+
+  const fetchEventSettings = async () => {
+    try {
+      const response = await fetch('/api/settings');
+      const data = await response.json();
+      
+      if (response.ok) {
+        setSettings(data.settings);
+        setStats(data.stats);
+      } else {
+        setError(data.error || 'Failed to load event settings');
+      }
+    } catch (err) {
+      setError('Failed to load event settings');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (submitted) {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handlePaymentSuccess = (reference: string) => {
+    window.location.href = `/confirmation?reference=${reference}`;
+  };
+
+  const handlePaymentError = (error: string) => {
+    setError(error);
+  };
+
+  if (loading) {
     return (
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 sm:px-8 md:px-12">
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 sm:px-8">
         <div className="mx-auto w-full max-w-md text-center">
-          <p className="text-[var(--foreground-muted)]">Redirecting to confirmation…</p>
-          <Link
-            href="/confirmation"
-            className="ora-btn mt-6 inline-flex items-center justify-center rounded-[var(--radius)] bg-[var(--accent)] px-5 py-3.5 text-sm font-medium text-[var(--background)] hover:bg-[var(--accent-hover)]"
-          >
-            View e-ticket
-          </Link>
+          <p className="text-[var(--foreground-muted)]">Loading...</p>
         </div>
       </div>
     );
   }
+
+  if (error) {
+    return (
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 sm:px-8">
+        <div className="mx-auto w-full max-w-md text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!settings || !stats) {
+    return null;
+  }
+
+  const price = type === "early-bird" ? settings.early_bird_price : settings.general_price;
+  const total = price * qty;
+  const isFormValid = formData.email && formData.name;
 
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 sm:px-8">
@@ -55,56 +110,75 @@ function CheckoutContent() {
           {qty} × {type === "early-bird" ? "Early Bird" : "General"} · GHS {total}
         </p>
 
-        <form onSubmit={handleSubmit} className="mt-10 space-y-8">
+        <div className="mt-10 space-y-8">
           <div>
             <h2 className="text-sm font-medium text-[var(--foreground-muted)] uppercase tracking-widest mb-4">
-              Payment method
+              Your details
             </h2>
-            <div className="space-y-2">
-              {PAYMENT_METHODS.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => setMethod(m.id)}
-                  className={`ora-card ora-btn w-full rounded-[var(--radius)] border px-4 py-3 text-left text-sm ${method === m.id ? "border-[var(--accent)] bg-[var(--surface-hover)] text-[var(--foreground)]" : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground-muted)] hover:border-[var(--foreground-muted)] hover:text-[var(--foreground)]"}`}
-                >
-                  <span className="font-medium">{m.label}</span>
-                  {m.desc && (
-                    <span className="mt-0.5 block text-xs text-[var(--foreground-muted)]">
-                      {m.desc}
-                    </span>
-                  )}
-                </button>
-              ))}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-[var(--foreground-muted)] mb-2">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="your@email.com"
+                  className="ora-card w-full border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] rounded-[var(--radius)]"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-[var(--foreground-muted)] mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Your full name"
+                  className="ora-card w-full border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] rounded-[var(--radius)]"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-[var(--foreground-muted)] mb-2">
+                  Phone (Optional)
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  placeholder="0XX XXX XXXX"
+                  className="ora-card w-full border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] rounded-[var(--radius)]"
+                />
+              </div>
             </div>
           </div>
 
-          {method && (
+          {isFormValid && (
             <div className="ora-transition border-t border-[var(--border)] pt-6">
-              <label className="block text-sm text-[var(--foreground-muted)] mb-2">
-                {method === "card" ? "Card number" : "Mobile number"}
-              </label>
-              <input
-                type="text"
-                placeholder={method === "card" ? "•••• •••• •••• ••••" : "0XX XXX XXXX"}
-                className="ora-card w-full border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground-muted)]"
+              <h2 className="text-sm font-medium text-[var(--foreground-muted)] uppercase tracking-widest mb-4">
+                Payment
+              </h2>
+              <PaystackCheckout
+                email={formData.email}
+                name={formData.name}
+                phone={formData.phone}
+                amount={total}
+                ticketType={type}
+                quantity={qty}
+                onSuccess={handlePaymentSuccess}
+                onError={handlePaymentError}
               />
-              <button
-                type="submit"
-                className="ora-btn mt-4 w-full rounded-[var(--radius)] bg-[var(--accent)] px-5 py-3.5 text-sm font-medium text-[var(--background)] hover:bg-[var(--accent-hover)]"
-              >
-                Confirm payment
-              </button>
             </div>
           )}
-        </form>
+        </div>
 
-        <Link
-          href="/tickets"
-          className="ora-transition mt-8 inline-block text-sm text-[var(--foreground-muted)] hover:text-[var(--accent)]"
-        >
-          ← Back to tickets
-        </Link>
       </div>
     </div>
   );

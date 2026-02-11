@@ -13,6 +13,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const isHome = pathname === "/";
+  const isAdmin = pathname.startsWith("/admin");
 
   return (
     <div className="app-shell relative min-h-screen overflow-x-hidden">
@@ -31,7 +32,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       <main className="flex min-h-0 flex-1 flex-col pt-[72px] pb-32 sm:pt-20 sm:pb-36 md:pb-40">
         {children}
       </main>
-      <Footer />
+      {!isAdmin && <Footer />}
     </div>
   );
 }

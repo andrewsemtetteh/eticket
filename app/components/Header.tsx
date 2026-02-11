@@ -25,13 +25,13 @@ export default function Header({ onMenuOpen }: HeaderProps) {
       <button
         type="button"
         onClick={onMenuOpen}
-        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[var(--radius)] border border-[var(--foreground)] bg-transparent text-[var(--foreground)] ora-btn hover:border-[var(--accent)] hover:text-[var(--accent)] sm:h-11 sm:w-11"
+        className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-[var(--radius)] bg-transparent text-[var(--foreground)] ora-btn hover:text-[var(--accent)] sm:h-14 sm:w-14"
         aria-label="Open menu"
       >
-        <span className="flex flex-col gap-1.5">
-          <span className="h-0.5 w-4 bg-current sm:w-5" />
-          <span className="h-0.5 w-4 bg-current sm:w-5" />
-          <span className="h-0.5 w-4 bg-current sm:w-5" />
+        <span className="flex flex-col gap-2 rotate-180 transform">
+          <span className="h-0.5 w-5 bg-current sm:w-6 ml-auto" />
+          <span className="h-0.5 w-4 bg-current sm:w-5 rounded-full" />
+          <span className="h-0.5 w-5 bg-current sm:w-6 ml-auto" />
         </span>
       </button>
     </header>

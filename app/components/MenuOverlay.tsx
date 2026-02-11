@@ -20,6 +20,7 @@ export default function MenuOverlay({ isOpen, onClose }: MenuOverlayProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -40,6 +41,29 @@ export default function MenuOverlay({ isOpen, onClose }: MenuOverlayProps) {
       NAV_ITEMS.forEach((item) => router.prefetch(item.href));
     }
   }, [isOpen, router]);
+
+  // Check if user is an authenticated admin
+  useEffect(() => {
+    const checkAdminAuth = async () => {
+      try {
+        const response = await fetch('/api/admin/auth/verify', {
+          credentials: 'include'
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setIsAdmin(data.authenticated && data.user?.is_admin);
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (error) {
+        setIsAdmin(false);
+      }
+    };
+
+    if (isOpen) {
+      checkAdminAuth();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -88,6 +112,26 @@ export default function MenuOverlay({ isOpen, onClose }: MenuOverlayProps) {
               </a>
             );
           })}
+          
+          {/* Dashboard menu item - only show for authenticated admin users */}
+          {isAdmin && (
+            <a
+              href="/admin"
+              onClick={(e) => handleNavClick(e, "/admin")}
+              className={`ora-menu-link-in flex items-center gap-3 py-3 text-xl font-medium tracking-tight ora-transition sm:text-2xl md:text-3xl ${
+                pathname === "/admin" || pathname.startsWith("/admin/")
+                  ? "text-[var(--accent)] font-semibold"
+                  : "text-[var(--foreground)] hover:text-[var(--accent)]"
+              }`}
+              style={{ animationDelay: `${NAV_ITEMS.length * 50}ms` }}
+            >
+              <span
+                className={`h-1 w-1 shrink-0 rounded-full bg-current opacity-0 transition-opacity ${pathname === "/admin" || pathname.startsWith("/admin/") ? "opacity-100" : ""}`}
+                aria-hidden
+              />
+              Dashboard
+            </a>
+          )}
         </nav>
       </div>
       {/* Same position as menu icon in header */}

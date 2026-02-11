@@ -44,6 +44,7 @@ export default function RootLayout({
     <html lang="en" className="dark h-full">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${lora.variable} antialiased h-full bg-[var(--background)] text-[var(--foreground)]`}
+        suppressHydrationWarning={true}
       >
         <Shell>{children}</Shell>
       </body>

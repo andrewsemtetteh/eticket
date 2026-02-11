@@ -1,29 +1,103 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
+import CheckoutModal from "../../components/CheckoutModal";
 
-const EARLY_BIRD_PRICE = 80;
-const GENERAL_PRICE = 120;
-const EARLY_BIRD_LIMIT = 40;
-const EARLY_BIRD_END_DATE = "15 March 2026";
+interface EventSettings {
+  early_bird_price: number;
+  general_price: number;
+  early_bird_limit: number;
+  early_bird_end_date: string;
+  total_ticket_limit: number;
+  event_date: string;
+  event_title: string;
+  early_bird_enabled?: boolean;
+  early_bird_mode?: string; // 'deadline' or 'count'
+}
 
-// In a real app this would come from the server
-const EARLY_BIRD_SOLD = 12;
-const earlyBirdLeft = Math.max(0, EARLY_BIRD_LIMIT - EARLY_BIRD_SOLD);
-const earlyBirdAvailable = earlyBirdLeft > 0;
+interface EventStats {
+  earlyBirdSold: number;
+  generalSold: number;
+  totalSold: number;
+  earlyBirdLeft: number;
+  earlyBirdAvailable: boolean;
+}
 
 export default function TicketSection() {
-  const maxQty = earlyBirdAvailable ? Math.min(10, earlyBirdLeft) : 10;
+  const [settings, setSettings] = useState<EventSettings | null>(null);
+  const [stats, setStats] = useState<EventStats | null>(null);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
 
-  const price = earlyBirdAvailable ? EARLY_BIRD_PRICE : GENERAL_PRICE;
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const response = await fetch('/api/settings');
+      const data = await response.json();
+      console.log('🎫 TicketSection - Settings loaded:', {
+        early_bird_mode: data.settings?.early_bird_mode,
+        early_bird_limit: data.settings?.early_bird_limit,
+        early_bird_end_date: data.settings?.early_bird_end_date,
+        early_bird_enabled: data.settings?.early_bird_enabled
+      });
+      if (response.ok) {
+        setSettings(data.settings);
+        setStats(data.stats);
+      }
+    } catch (error) {
+      console.error('Failed to fetch settings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Use the earlyBirdAvailable from stats which already considers early_bird_enabled
+  const earlyBirdLeft = stats?.earlyBirdLeft ?? 0;
+  const earlyBirdAvailable = stats?.earlyBirdAvailable ?? false;
+
+  const maxQty = earlyBirdAvailable ? Math.min(10, earlyBirdLeft) : 10;
+  
+  const earlyBirdPrice = settings?.early_bird_price ?? 200;
+  const generalPrice = settings?.general_price ?? 300;
+  const earlyBirdLimit = settings?.early_bird_limit ?? 40;
+  const earlyBirdEndDate = settings?.early_bird_end_date ?? "15 March 2026";
+  const earlyBirdMode = settings?.early_bird_mode ?? "deadline";
+
+  // Format the early bird end date for display
+  const formatEarlyBirdDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
+      return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const price = earlyBirdAvailable ? earlyBirdPrice : generalPrice;
   const total = price * quantity;
   const ticketType = earlyBirdAvailable ? "early-bird" : "general";
-  const checkoutHref = `/checkout?type=${ticketType}&qty=${quantity}`;
 
   const handleSubtract = () => setQuantity((q) => Math.max(1, q - 1));
   const handleAdd = () => setQuantity((q) => Math.min(maxQty, q + 1));
+  const handleBuyTicket = () => setIsCheckoutModalOpen(true);
+  const handleCloseModal = () => setIsCheckoutModalOpen(false);
+
+  if (loading) {
+    return (
+      <section className="w-full">
+        <div className="ora-card border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
+          <div className="p-5 text-center">
+            <p className="text-[var(--foreground-muted)]">Loading tickets...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="w-full">
@@ -36,10 +110,13 @@ export default function TicketSection() {
                 Early Bird
               </span>
               <p className="mt-2 text-base font-medium text-[var(--foreground)]">
-                GHS {EARLY_BIRD_PRICE}
+                GHS {earlyBirdPrice}
               </p>
               <p className="mt-0.5 text-xs text-[var(--foreground-muted)]">
-                First {EARLY_BIRD_LIMIT} tickets or until {EARLY_BIRD_END_DATE}
+                {earlyBirdMode === 'count' 
+                  ? `First ${earlyBirdLimit} tickets only`
+                  : `Until ${formatEarlyBirdDate(earlyBirdEndDate)}`
+                }
               </p>
               <p className="mt-1.5 text-xs text-[var(--accent)]">
                 {earlyBirdLeft} left at this price
@@ -54,7 +131,7 @@ export default function TicketSection() {
                 General
               </p>
               <p className="mt-1 text-base font-medium text-[var(--foreground)]">
-                GHS {GENERAL_PRICE}
+                GHS {generalPrice}
               </p>
               <p className="mt-0.5 text-xs text-[var(--foreground-muted)]">
                 Standard admission
@@ -103,14 +180,22 @@ export default function TicketSection() {
               GHS {total}
             </span>
           </div>
-          <Link
-            href={checkoutHref}
-            className="ora-btn mt-5 flex w-full items-center justify-center rounded-2xl bg-[var(--accent)] px-5 py-3.5 text-base font-medium text-[var(--background)] hover:bg-[var(--accent-hover)]"
+          <button
+            onClick={handleBuyTicket}
+            className="ora-btn mt-5 flex items-center justify-center rounded-2xl bg-[var(--accent)] px-8 py-3.5 text-lg font-medium text-[var(--background)] hover:bg-[var(--accent-hover)] mx-auto"
           >
             Buy ticket{quantity > 1 ? "s" : ""}
-          </Link>
+          </button>
         </div>
       </div>
+
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={isCheckoutModalOpen}
+        onClose={handleCloseModal}
+        ticketType={ticketType}
+        quantity={quantity}
+      />
     </section>
   );
 }

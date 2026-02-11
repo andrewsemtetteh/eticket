@@ -6,10 +6,26 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint",
+    "db:migrate": "supabase db push",
+    "db:reset": "supabase db reset",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop"
   },
   "dependencies": {
+    "@libsql/client": "^0.17.0",
+    "@paystack/inline-js": "^2.22.7",
+    "@prisma/adapter-libsql": "^7.3.0",
+    "@prisma/client": "^7.3.0",
+    "@supabase/supabase-js": "^2.95.3",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/nodemailer": "^7.0.9",
+    "bcryptjs": "^3.0.3",
+    "jsonwebtoken": "^9.0.3",
     "next": "16.1.6",
+    "nodemailer": "^8.0.1",
+    "prisma": "^7.3.0",
     "qrcode.react": "^4.2.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
@@ -21,6 +37,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "supabase": "^2.76.7",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
