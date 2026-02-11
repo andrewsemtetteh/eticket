@@ -3,6 +3,12 @@ import { supabase } from '@/lib/supabase';
 
 export async function POST() {
   try {
+    console.log('🚀 Admin setup started');
+    console.log('🔍 Environment check:', {
+      supabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+    });
+
     const adminUsers = [
       { email: 'arthurbernice201@gmail.com', name: 'Bernice Arthur' },
       { email: 'andrewsemtetteh@gmail.com', name: 'Andrew Sem Tetteh' },

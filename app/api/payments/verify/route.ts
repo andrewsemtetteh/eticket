@@ -9,10 +9,26 @@ export async function POST(request: NextRequest) {
   try {
     const { reference } = await request.json();
 
+    console.log('🔍 Payment verification:', { 
+      reference,
+      hasPaystackKey: !!process.env.PAYSTACK_SECRET_KEY,
+      hasSmtpConfig: !!process.env.SMTP_HOST
+    });
+
     if (!reference) {
+      console.log('❌ Missing payment reference');
       return NextResponse.json(
         { error: 'Payment reference is required' },
         { status: 400 }
+      );
+    }
+
+    // Check environment variables
+    if (!process.env.PAYSTACK_SECRET_KEY) {
+      console.log('❌ Missing Paystack secret key');
+      return NextResponse.json(
+        { error: 'Payment service configuration error' },
+        { status: 500 }
       );
     }
 

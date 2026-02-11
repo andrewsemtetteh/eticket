@@ -5,6 +5,11 @@ export async function GET() {
   try {
     console.log('🔍 Settings API - Starting request...');
     
+    console.log('⚙️ Settings fetch:', {
+      hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+    });
+
     // Get event settings
     const { data: settings, error: settingsError } = await supabaseAdmin
       .from('event_settings')

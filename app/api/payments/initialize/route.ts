@@ -8,10 +8,29 @@ export async function POST(request: NextRequest) {
   try {
     const { email, name, phone, ticketType, quantity, amount } = await request.json();
 
+    console.log('💳 Payment initialization:', { 
+      email, 
+      ticketType, 
+      quantity, 
+      amount,
+      hasPaystackKey: !!process.env.PAYSTACK_SECRET_KEY,
+      baseUrl: process.env.NEXT_PUBLIC_BASE_URL
+    });
+
     if (!email || !name || !ticketType || !quantity || !amount) {
+      console.log('❌ Missing required fields');
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
+      );
+    }
+
+    // Check environment variables
+    if (!process.env.PAYSTACK_SECRET_KEY || !process.env.NEXT_PUBLIC_BASE_URL) {
+      console.log('❌ Missing payment environment variables');
+      return NextResponse.json(
+        { error: 'Payment service configuration error' },
+        { status: 500 }
       );
     }
 
