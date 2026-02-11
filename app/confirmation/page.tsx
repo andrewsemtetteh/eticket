@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -42,7 +42,7 @@ function useThemeColors() {
   return colors;
 }
 
-export default function ConfirmationPage() {
+function ConfirmationContent() {
   const { fg, bg } = useThemeColors();
   const searchParams = useSearchParams();
   const reference = searchParams.get('reference');
@@ -214,5 +214,23 @@ export default function ConfirmationPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function ConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 sm:px-8 md:px-12">
+        <div className="mx-auto w-full max-w-2xl text-center">
+          <div className="animate-pulse">
+            <div className="h-8 bg-[var(--surface)] rounded mb-4"></div>
+            <div className="h-4 bg-[var(--surface)] rounded mb-8"></div>
+            <div className="h-32 bg-[var(--surface)] rounded"></div>
+          </div>
+        </div>
+      </div>
+    }>
+      <ConfirmationContent />
+    </Suspense>
   );
 }

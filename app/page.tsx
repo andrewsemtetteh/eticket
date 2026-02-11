@@ -34,18 +34,16 @@ export default function Home() {
           April 25, 2026
         </p>
 
-        {/* Primary action – gradient border, inner fill via ::after in globals.css */}
+        {/* Primary action – rainbow border button */}
         <div className={`mt-14 flex justify-center sm:mt-16 transition-all duration-900 ease-out delay-700 ${
           mounted ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-6 scale-95'
         }`}>
-          <span className="rotating-gradient-border inline-block transition-all duration-300 hover:scale-[1.05] active:scale-[0.98] hover:rotate-1">
-            <Link
-              href="/tickets"
-              className="rotating-gradient-border-inner relative z-10 inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-[var(--background)] sm:text-xl transition-all duration-300 hover:px-10"
-            >
-              Get tickets
-            </Link>
-          </span>
+          <Link
+            href="/tickets"
+            className="rotating-gradient-border relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-[var(--foreground)] sm:text-xl"
+          >
+            Get tickets
+          </Link>
         </div>
       </div>
     </div>

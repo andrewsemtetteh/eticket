@@ -205,8 +205,44 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-/* Gradient border button – gradient on element, ::after for inner fill, no rotation */
+/* Rainbow border button – animated rainbow gradient */
+@keyframes rainbow {
+  0% { background-position: 0 0; }
+  50% { background-position: 400% 0; }
+  100% { background-position: 0 0; }
+}
+
 .rotating-gradient-border {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50px;
+  cursor: pointer;
+  background: var(--background);
+  border: none;
+}
+
+.rotating-gradient-border::before,
+.rotating-gradient-border::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: -2px;
+  border-radius: 52px;
+  background: linear-gradient(45deg, #fb0094, #0000ff, #00ff00, #ffff00, #ff0000, #fb0094, #0000ff, #00ff00, #ffff00, #ff0000);
+  background-size: 400%;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  z-index: -1;
+  animation: rainbow 20s linear infinite;
+}
+
+.rotating-gradient-border::after {
+  filter: blur(50px);
+}
+/* Previous gradient button styles for component */
+.gradient-border-button {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -222,8 +258,8 @@ button:focus-visible {
     transparent 360deg
   );
 }
-/* Inner fill – inset 5px, rounded 45px (50 - 5), leaves gradient visible as 5px border */
-.rotating-gradient-border::after {
+
+.gradient-border-button::after {
   content: "";
   display: block;
   position: absolute;
@@ -233,7 +269,8 @@ button:focus-visible {
   z-index: 1;
   transition: opacity 0.3s ease;
 }
-.rotating-gradient-border-inner {
+
+.gradient-border-button-inner {
   position: relative;
   z-index: 10;
   display: inline-flex;
@@ -242,10 +279,12 @@ button:focus-visible {
   color: var(--color-button-text, var(--background));
   transition: transform 0.2s var(--ease-out);
 }
-.rotating-gradient-border-inner:hover {
+
+.gradient-border-button-inner:hover {
   transform: scale(1.02);
 }
-.rotating-gradient-border-inner:active {
+
+.gradient-border-button-inner:active {
   transform: scale(0.98);
 }
 
