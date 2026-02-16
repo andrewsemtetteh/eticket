@@ -114,7 +114,8 @@ export default function TicketSection() {
               </p>
               <p className="mt-0.5 text-xs text-[var(--foreground-muted)]">
                 {earlyBirdMode === 'count' 
-                  ? `First ${earlyBirdLimit} tickets only`
+                  // ? `First ${earlyBirdLimit} tickets only`
+                  ? `Limited availability`
                   : `Until ${formatEarlyBirdDate(earlyBirdEndDate)}`
                 }
               </p>

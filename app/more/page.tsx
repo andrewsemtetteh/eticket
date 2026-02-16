@@ -14,9 +14,9 @@ export default function More() {
         <div className="mt-10 space-y-6 border-t border-[var(--border)] pt-8">
           <p className="text-[var(--foreground)] leading-relaxed">
             E-tickets are sent by email and SMS after payment. Present your
-            ticket (QR code) at the door. Bank cards and mobile money (MTN,
+            ticket (QR code) at the entrance of the venue. Bank cards and mobile money (MTN,
             Vodafone/Telecel, AirtelTigo) are accepted. Event location details
-            will be shared via email after ticket purchase.
+            will be shared via email after ticket purchase, two weeks before the event.
           </p>
           <Link
             href="/tickets"
