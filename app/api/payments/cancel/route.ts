@@ -74,17 +74,42 @@ export async function GET(request: NextRequest) {
   const reference = searchParams.get('reference');
   
   if (reference) {
-    // Update payment status to cancelled
-    await supabaseAdmin
-      .from('payments')
-      .update({ status: 'cancelled' })
-      .eq('reference', reference)
-      .eq('status', 'pending');
+    try {
+      // Find payment record
+      const { data: payment } = await supabaseAdmin
+        .from('payments')
+        .select('*')
+        .eq('reference', reference)
+        .single();
+
+      if (payment && payment.status === 'pending') {
+        // Update payment status to cancelled
+        await supabaseAdmin
+          .from('payments')
+          .update({ status: 'cancelled' })
+          .eq('reference', reference)
+          .eq('status', 'pending');
+
+        // Cancel any pending tickets associated with this payment
+        await supabaseAdmin
+          .from('tickets')
+          .update({ status: 'cancelled' })
+          .eq('payment_id', payment.id)
+          .eq('status', 'pending');
+
+        console.log('✅ Payment cancelled via Paystack redirect:', reference);
+      }
+    } catch (error) {
+      console.error('Error cancelling payment via redirect:', error);
+    }
   }
   
-  // Redirect to home page with cancelled status
-  const redirectUrl = new URL('/', request.url);
-  redirectUrl.searchParams.set('payment', 'cancelled');
+  // Redirect to checkout page with cancelled status
+  const redirectUrl = new URL('/checkout', request.url);
+  redirectUrl.searchParams.set('cancelled', 'true');
+  if (reference) {
+    redirectUrl.searchParams.set('reference', reference);
+  }
   
   return NextResponse.redirect(redirectUrl);
 }

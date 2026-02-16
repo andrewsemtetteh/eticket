@@ -41,6 +41,13 @@ function CheckoutContent() {
     fetchEventSettings();
   }, []);
 
+  // Handle Paystack cancel action redirect
+  useEffect(() => {
+    if (cancelled && cancelledRef) {
+      handlePaymentCancel(cancelledRef);
+    }
+  }, [cancelled, cancelledRef]);
+
   const fetchEventSettings = async () => {
     try {
       const response = await fetch('/api/settings');
@@ -74,7 +81,22 @@ function CheckoutContent() {
     setError(error);
   };
 
-  const handlePaymentCancel = () => {
+  const handlePaymentCancel = async (reference?: string) => {
+    try {
+      // Call cancel API to update database
+      const cancelReference = reference || cancelledRef;
+      if (cancelReference) {
+        await fetch('/api/payments/cancel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reference: cancelReference })
+        });
+        console.log('✅ Payment cancelled manually:', cancelReference);
+      }
+    } catch (error) {
+      console.error('Cancellation failed:', error);
+    }
+    
     // Redirect back to tickets page
     window.location.href = '/tickets';
   };

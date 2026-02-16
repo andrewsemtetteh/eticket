@@ -32,7 +32,7 @@ interface PaystackCheckoutProps {
   quantity: number;
   onSuccess: (reference: string) => void;
   onError: (error: string) => void;
-  onCancel?: () => void;
+  onCancel?: (reference?: string) => void;
 }
 
 export default function PaystackCheckout({
@@ -49,6 +49,7 @@ export default function PaystackCheckout({
   const [loading, setLoading] = useState(false);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'initializing' | 'processing' | 'success' | 'failed'>('idle');
+  const [currentReference, setCurrentReference] = useState<string>('');
 
   useEffect(() => {
     // Load Paystack inline script
@@ -99,6 +100,8 @@ export default function PaystackCheckout({
         throw new Error(data.error || 'Failed to initialize payment');
       }
 
+      // Store reference for cancellation
+      setCurrentReference(data.reference);
       setPaymentStatus('processing');
 
       // Use Paystack inline modal with enhanced configuration
@@ -139,9 +142,9 @@ export default function PaystackCheckout({
           setLoading(false);
           if (paymentStatus === 'processing') {
             setPaymentStatus('idle');
-            // Handle payment cancellation
+            // Handle payment cancellation with reference
             if (onCancel) {
-              onCancel();
+              onCancel(currentReference);
             }
           }
         }
