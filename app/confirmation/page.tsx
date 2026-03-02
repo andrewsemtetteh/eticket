@@ -147,64 +147,26 @@ function ConfirmationContent() {
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 sm:px-8 md:px-12">
       <div className="mx-auto w-full max-w-md">
-        <h1 className="text-2xl font-medium tracking-tight text-[var(--foreground)] sm:text-3xl">
+        <h1 className="text-2xl font-medium tracking-tight text-[var(--foreground)] sm:text-3xl text-center">
           Your e-ticket{tickets.length > 1 ? 's' : ''}
         </h1>
-        <p className="font-event-title mt-2 text-sm text-[var(--foreground-muted)]">
+        <p className="font-event-title mt-2 text-sm text-[var(--foreground-muted)] text-center">
           Sitting with the Silence After the Noise
         </p>
 
-        <div className="ora-card mt-8 border border-[var(--border)] bg-[var(--surface)] p-6">
-          <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-8">
-            <div className="flex shrink-0 items-center justify-center rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)] p-4">
-              <QRCodeSVG
-                value={mainTicket.ticket_id}
-                size={140}
-                level="M"
-                includeMargin={false}
-                fgColor={fg}
-                bgColor={bg}
-              />
-            </div>
-            <div className="flex-1 text-center sm:text-left">
-              <p className="text-xs text-[var(--foreground-muted)] uppercase tracking-widest">
-                Ticket ID
-              </p>
-              <p className="mt-1 font-mono text-lg tracking-wide text-[var(--foreground)]">
-                {mainTicket.ticket_id}
-              </p>
-              <p className="mt-4 text-sm text-[var(--foreground-muted)]">
-                {tickets.length} × {ticketTypeLabel}
-              </p>
-              <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-                Total: {payment.currency} {payment.amount}
-              </p>
-              <p className="mt-2 text-sm text-[var(--foreground)]">
-                Present this QR code at the door.
-              </p>
-            </div>
+        <div className="ora-card mt-8 border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
+          <div className="mx-auto w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+            </svg>
           </div>
+          <h2 className="text-xl font-semibold text-[var(--foreground)] mb-4">
+            Payment Successful!
+          </h2>
+          <p className="text-[var(--foreground)]">
+            A copy of your ticket has been sent to <strong>{user.email}</strong>
+          </p>
         </div>
-
-        {tickets.length > 1 && (
-          <div className="mt-6">
-            <p className="text-sm font-medium text-[var(--foreground-muted)] mb-3">
-              Additional Tickets:
-            </p>
-            <div className="space-y-2">
-              {tickets.slice(1).map((ticket) => (
-                <div key={ticket.id} className="ora-card border border-[var(--border)] bg-[var(--surface)] p-3">
-                  <p className="font-mono text-sm text-[var(--foreground)]">{ticket.ticket_id}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <p className="mt-6 text-xs text-[var(--foreground-muted)]">
-          A copy has been sent to {user.email}. Event location details will be shared via email. 
-          You can return to this page anytime using the payment reference: {payment.reference}
-        </p>
       </div>
     </div>
   );

@@ -555,7 +555,98 @@ export const generateTicketPDF = async (data: TicketEmailData): Promise<Buffer> 
       </text>
     </svg>`;
     
-    return Buffer.from(svgContent);
+    // Convert SVG to proper PDF using a simple approach
+    try {
+      // Create a simple HTML wrapper for the SVG
+      const svgHTML = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { margin: 0; padding: 0; }
+          svg { display: block; }
+        </style>
+      </head>
+      <body>
+        ${svgContent}
+      </body>
+      </html>`;
+      
+      const puppeteer = require('puppeteer');
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+      
+      const page = await browser.newPage();
+      await page.setContent(svgHTML, { waitUntil: 'domcontentloaded' });
+      
+      const pdfBuffer = await page.pdf({
+        width: '1000px',
+        height: '280px',
+        printBackground: true,
+        margin: { top: 0, right: 0, bottom: 0, left: 0 }
+      });
+      
+      await browser.close();
+      return pdfBuffer;
+    } catch (svgError) {
+      console.error('❌ SVG to PDF conversion failed, creating basic PDF:', svgError);
+      
+      // Last resort: Create a proper minimal PDF
+      const minimalPDF = `
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 1000 280] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+
+4 0 obj
+<< /Length 150 >>
+stream
+BT
+/F1 16 Tf
+50 200 Td
+(${data.eventTitle}) Tj
+/F1 12 Tf
+0 -30 Td
+(Ticket ID: ${data.ticketId}) Tj
+0 -20 Td
+(Reference: ${data.paymentReference}) Tj
+0 -20 Td
+(${data.customerName} - ${data.quantity} ${data.ticketType === 'early_bird' ? 'Early Bird' : 'General'} Ticket${data.quantity > 1 ? 's' : ''}) Tj
+ET
+endstream
+endobj
+
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000254 00000 n 
+0000000456 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+523
+%%EOF`;
+      
+      return Buffer.from(minimalPDF);
+    }
   }
 };
 
@@ -571,30 +662,26 @@ export const sendTicketEmail = async (
 
     // Send email to customer with PDF attachment
     const customerMailOptions = {
-      from: `"Orà duku" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+      from: `${process.env.SMTP_FROM || process.env.SMTP_USER}`,
       to: data.customerEmail,
       subject: `Your Ticket Confirmation - ${data.eventTitle}`,
       html: `
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6;">
-    <h2 style="color: #333; margin-bottom: 20px;">Hello ${data.customerName},</h2>
+    <h2 style="color: #000; margin-bottom: 20px; text-align: left;">Hello ${data.customerName},</h2>
     
-    <p style="color: #333; margin-bottom: 20px;">
+    <p style="color: #000; margin-bottom: 20px; text-align: left;">
         The attached document is your purchased ticket for <strong>${data.eventTitle}</strong>.
     </p>
     
-    <p style="color: #333; margin-bottom: 20px;">
+    <p style="color: #000; margin-bottom: 20px; text-align: left;">
         Your ticket is attached as a PDF file. Please download and save it. Bring it with you to the event.
     </p>
     
-    <div style="background: #f8f9fa; padding: 20px; border-left: 4px solid #C9A227; margin: 20px 0;">
-        <h3 style="color: #333; margin-top: 0; margin-bottom: 15px;">Event Details</h3>
-        <p style="margin: 8px 0; color: #333;"><strong>Date:</strong> ${data.eventDate}</p>
-        <p style="margin: 8px 0; color: #333;"><strong>Time:</strong> ${data.eventTime}</p>
-        <p style="margin: 8px 0; color: #333;"><strong>Location:</strong> Will be communicated 2 weeks before the event</p>
-        <p style="margin: 8px 0; color: #333;"><strong>Ticket ID:</strong> ${data.ticketId}</p>
-    </div>
+    <p style="color: #000; margin-bottom: 20px; text-align: left;">
+        <strong>Location:</strong> Will be communicated 2 weeks before the event
+    </p>
     
-    <p style="color: #666; margin-top: 30px;">
+    <p style="color: #000; margin-top: 30px; text-align: left;">
         Best regards,<br>
         <strong>The Orà duku Team</strong>
     </p>
@@ -616,37 +703,34 @@ export const sendTicketEmail = async (
     for (const adminEmail of adminEmails) {
       if (adminEmail && adminEmail !== 'admin1@example.com' && adminEmail !== 'admin2@example.com' && adminEmail !== 'admin3@example.com') {
         const adminMailOptions = {
-          from: `"Orà duku" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+          from: `${process.env.SMTP_FROM || process.env.SMTP_USER}`,
           to: adminEmail,
           subject: `New Ticket Purchase - ${data.customerName}`,
           html: `
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6;">
-    <h2 style="color: #333; margin-bottom: 20px;">Admin Notification</h2>
-    
-    <p style="color: #333; margin-bottom: 20px;">
+    <p style="color: #000; margin-bottom: 20px; text-align: left;">
         A new ticket has been purchased by <strong>${data.customerName}</strong> for <strong>${data.eventTitle}</strong>.
     </p>
     
-    <div style="background: #f8f9fa; padding: 20px; border-left: 4px solid #3B82F6; margin: 20px 0;">
-        <h3 style="color: #333; margin-top: 0; margin-bottom: 15px;">Purchase Details</h3>
-        <p style="margin: 8px 0; color: #333;"><strong>Customer:</strong> ${data.customerName}</p>
-        <p style="margin: 8px 0; color: #333;"><strong>Email:</strong> ${data.customerEmail}</p>
-        <p style="margin: 8px 0; color: #333;"><strong>Phone:</strong> ${data.customerPhone}</p>
-        <p style="margin: 8px 0; color: #333;"><strong>Event:</strong> ${data.eventTitle}</p>
-        <p style="margin: 8px 0; color: #333;"><strong>Date:</strong> ${data.eventDate}</p>
-        <p style="margin: 8px 0; color: #333;"><strong>Time:</strong> ${data.eventTime}</p>
-        <p style="margin: 8px 0; color: #333;"><strong>Ticket Type:</strong> ${data.ticketType === 'early_bird' ? 'Early Bird' : 'General'}</p>
-        <p style="margin: 8px 0; color: #333;"><strong>Quantity:</strong> ${data.quantity}</p>
-        <p style="margin: 8px 0; color: #333;"><strong>Total Amount:</strong> ${data.currency} ${data.totalAmount.toFixed(2)}</p>
-        <p style="margin: 8px 0; color: #333;"><strong>Ticket ID:</strong> ${data.ticketId}</p>
-        <p style="margin: 8px 0; color: #333;"><strong>Payment Reference:</strong> ${data.paymentReference}</p>
+    <div style="padding: 20px; margin: 20px 0;">
+        <h3 style="color: #000; margin-top: 0; margin-bottom: 15px; text-align: left;">Purchase Details</h3>
+        <p style="margin: 8px 0; color: #000; text-align: left;"><strong>Customer:</strong> ${data.customerName}</p>
+        <p style="margin: 8px 0; color: #000; text-align: left;"><strong>Email:</strong> ${data.customerEmail}</p>
+        <p style="margin: 8px 0; color: #000; text-align: left;"><strong>Phone:</strong> ${data.customerPhone}</p>
+        <p style="margin: 8px 0; color: #000; text-align: left;"><strong>Event:</strong> ${data.eventTitle}</p>
+        <p style="margin: 8px 0; color: #000; text-align: left;"><strong>Date:</strong> ${data.eventDate}</p>
+        <p style="margin: 8px 0; color: #000; text-align: left;"><strong>Ticket Type:</strong> ${data.ticketType === 'early_bird' ? 'Early Bird' : 'General'}</p>
+        <p style="margin: 8px 0; color: #000; text-align: left;"><strong>Quantity:</strong> ${data.quantity}</p>
+        <p style="margin: 8px 0; color: #000; text-align: left;"><strong>Total Amount:</strong> ${data.currency} ${data.totalAmount.toFixed(2)}</p>
+        <p style="margin: 8px 0; color: #000; text-align: left;"><strong>Ticket ID:</strong> ${data.ticketId}</p>
+        <p style="margin: 8px 0; color: #000; text-align: left;"><strong>Payment Reference:</strong> ${data.paymentReference}</p>
     </div>
     
-    <p style="color: #333; margin-bottom: 20px;">
+    <p style="color: #000; margin-bottom: 20px; text-align: left;">
         The ticket PDF has been generated and sent to the customer. A copy is attached for your records.
     </p>
     
-    <p style="color: #666; margin-top: 30px;">
+    <p style="color: #000; margin-top: 30px; text-align: left;">
         Best regards,<br>
         <strong>The Orà duku Team</strong>
     </p>

@@ -23,16 +23,28 @@ interface EventStats {
   earlyBirdAvailable: boolean;
 }
 
-export default function TicketSection() {
-  const [settings, setSettings] = useState<EventSettings | null>(null);
-  const [stats, setStats] = useState<EventStats | null>(null);
-  const [loading, setLoading] = useState(true);
+interface TicketSectionProps {
+  initialData?: {
+    settings: EventSettings | null;
+    stats: EventStats | null;
+  };
+}
+
+export default function TicketSection({ initialData }: TicketSectionProps = {}) {
+  const [settings, setSettings] = useState<EventSettings | null>(initialData?.settings || null);
+  const [stats, setStats] = useState<EventStats | null>(initialData?.stats || null);
+  const [loading, setLoading] = useState(!initialData?.settings); // Only loading if no initial data
   const [quantity, setQuantity] = useState(1);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchSettings();
-  }, []);
+    // Only fetch if we don't have initial data
+    if (!initialData?.settings) {
+      fetchSettings();
+    } else {
+      setLoading(false); // Data already loaded, no loading needed
+    }
+  }, [initialData]);
 
   const fetchSettings = async () => {
     try {
@@ -53,6 +65,12 @@ export default function TicketSection() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Refresh function for manual updates
+  const refreshData = async () => {
+    setLoading(true);
+    await fetchSettings();
   };
 
   // Use the earlyBirdAvailable from stats which already considers early_bird_enabled

@@ -106,18 +106,21 @@ export async function POST(request: NextRequest) {
         tickets.push(ticket);
       }
 
-      // Get user details for email
-      const { data: user } = await supabaseAdmin
-        .from('users')
-        .select('*')
-        .eq('id', payment.user_id)
-        .single();
+      // Get user and settings data in parallel for email
+      const [userResult, settingsResult] = await Promise.all([
+        supabaseAdmin
+          .from('users')
+          .select('*')
+          .eq('id', payment.user_id)
+          .single(),
+        supabaseAdmin
+          .from('event_settings')
+          .select('*')
+          .single()
+      ]);
 
-      // Get event settings for email
-      const { data: settings } = await supabaseAdmin
-        .from('event_settings')
-        .select('*')
-        .single();
+      const user = userResult.data;
+      const settings = settingsResult.data;
 
       // Send ticket confirmation emails
       if (user && settings && tickets.length > 0) {
@@ -132,18 +135,31 @@ export async function POST(request: NextRequest) {
           currency: 'GHS',
           eventTitle: settings.event_title || 'Sitting with the Silence After the Noise',
           eventDate: settings.event_date || 'April 25, 2026',
-          eventTime: settings.event_time || '6:00 PM',
+          eventTime: settings.event_time || '5:00 PM',
           venueName: settings.venue_name || 'Oraduku Event Center',
           venueAddress: settings.venue_address || 'Accra, Ghana',
           paymentReference: reference,
           purchaseDate: new Date().toLocaleString(),
         };
 
-        const adminEmails = [
+        // Build admin recipient list from explicit settings first
+        let adminEmails: string[] = [
           settings.admin_email_1,
           settings.admin_email_2,
           settings.admin_email_3,
-        ].filter(Boolean);
+        ].filter((email): email is string => !!email);
+
+        // If no explicit admin emails are configured, fall back to all admin users
+        if (adminEmails.length === 0) {
+          const { data: adminUsers } = await supabaseAdmin
+            .from('users')
+            .select('email')
+            .eq('role', 'admin');
+
+          if (adminUsers) {
+            adminEmails = adminUsers.map(u => u.email).filter(Boolean);
+          }
+        }
 
         // Send emails asynchronously (don't block response)
         sendTicketEmail(emailData, adminEmails).catch(err => {

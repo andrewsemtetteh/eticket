@@ -1,9 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
+// Simple in-memory cache (for production, use Redis)
+let cache: any = null;
+let cacheTime = 0;
+const CACHE_DURATION = 30000; // 30 seconds
+
 export async function GET() {
   try {
-    console.log('🔍 Settings API - Starting request...');
+    // Check cache first
+    const now = Date.now();
+    if (cache && (now - cacheTime) < CACHE_DURATION) {
+      console.log('� Settings API - Using cache');
+      return NextResponse.json(cache);
+    }
+
+    console.log('🔍 Settings API - Fresh request...');
     
     console.log('⚙️ Settings fetch:', {
       hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -30,28 +42,23 @@ export async function GET() {
       throw settingsError;
     }
 
-    // Get ticket statistics
+    // Get ticket statistics with optimized query
     const { data: tickets } = await supabaseAdmin
       .from('tickets')
       .select('type, quantity')
       .eq('status', 'confirmed');
 
-    const stats = {
-      earlyBirdSold: 0,
-      generalSold: 0,
-      totalSold: 0,
-    };
-
-    if (tickets) {
-      tickets.forEach((ticket: any) => {
-        if (ticket.type === 'early_bird') {
-          stats.earlyBirdSold += ticket.quantity;
-        } else {
-          stats.generalSold += ticket.quantity;
-        }
-        stats.totalSold += ticket.quantity;
-      });
-    }
+    // Calculate stats more efficiently
+    const stats = tickets?.reduce((acc, ticket: any) => {
+      const qty = ticket.quantity || 1;
+      if (ticket.type === 'early_bird') {
+        acc.earlyBirdSold += qty;
+      } else {
+        acc.generalSold += qty;
+      }
+      acc.totalSold += qty;
+      return acc;
+    }, { earlyBirdSold: 0, generalSold: 0, totalSold: 0 }) || { earlyBirdSold: 0, generalSold: 0, totalSold: 0 };
 
     // Early bird is available only if: enabled AND tickets left
     const earlyBirdEnabled = settings.early_bird_enabled !== false;
@@ -62,7 +69,7 @@ export async function GET() {
       : 0;
     const earlyBirdAvailable = earlyBirdEnabled && earlyBirdLeft > 0;
 
-    return NextResponse.json({
+    const response = {
       settings,
       stats: {
         ...stats,
@@ -70,7 +77,14 @@ export async function GET() {
         earlyBirdAvailable,
         earlyBirdEnabled,
       }
-    });
+    };
+
+    // Cache the response
+    cache = response;
+    cacheTime = Date.now();
+    console.log('📋 Settings API - Cached response');
+
+    return NextResponse.json(response);
 
   } catch (error) {
     console.error('Settings API error:', error);
@@ -81,6 +95,11 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const updates = await request.json();
+    
+    // Clear cache when settings are updated
+    cache = null;
+    cacheTime = 0;
+    console.log('📋 Settings API - Cache cleared due to update');
     console.log('🔧 Settings PUT - Received updates:', updates);
 
     // First get the settings ID (there should only be one row)

@@ -80,7 +80,7 @@ export default function AdminSettingsPage() {
       setEditValues({
         event_title: data.settings.event_title || '',
         event_date: data.settings.event_date || '',
-        event_time: data.settings.event_time || '6:00 PM',
+        event_time: data.settings.event_time || '5:00 PM',
         venue_name: data.settings.venue_name || 'Oraduku Event Center',
         venue_address: data.settings.venue_address || 'Accra, Ghana',
         admin_email_1: data.settings.admin_email_1 || '',

@@ -80,7 +80,7 @@ export default function Footer() {
         if (response.ok && data.settings) {
           // Combine event_date and event_time from settings
           const dateStr = data.settings.event_date || "April 25, 2026";
-          const timeStr = data.settings.event_time || "6:00 PM";
+          const timeStr = data.settings.event_time || "5:00 PM";
           
           // Parse the date and time
           const eventDateTime = new Date(`${dateStr} ${timeStr}`);
