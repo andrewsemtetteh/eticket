@@ -1,4 +1,7 @@
 import nodemailer from 'nodemailer';
+import puppeteer from 'puppeteer';
+import fs from 'fs';
+import path from 'path';
 
 interface TicketEmailData {
   customerName: string;
@@ -650,6 +653,21 @@ startxref
   }
 };
 
+// Function to get the appropriate PDF ticket based on ticket type
+const getTicketPDF = (ticketType: 'early_bird' | 'general'): Buffer => {
+  const pdfPath = ticketType === 'early_bird' 
+    ? path.join(process.cwd(), 'public', 'earlybirdTickets.pdf')
+    : path.join(process.cwd(), 'public', 'latebirdTickets.pdf');
+  
+  try {
+    const pdfBuffer = fs.readFileSync(pdfPath);
+    return pdfBuffer;
+  } catch (error) {
+    console.error(`❌ Error reading PDF file: ${pdfPath}`, error);
+    throw new Error(`Unable to read ticket PDF file for ${ticketType} ticket`);
+  }
+};
+
 export const sendTicketEmail = async (
   data: TicketEmailData,
   adminEmails: string[]
@@ -657,8 +675,8 @@ export const sendTicketEmail = async (
   try {
     const transporter = createTransporter();
     
-    // Generate PDF ticket (now async)
-    const pdfBuffer = await generateTicketPDF(data);
+    // Get the appropriate PDF ticket based on ticket type
+    const pdfBuffer = getTicketPDF(data.ticketType);
 
     // Send email to customer with PDF attachment
     const customerMailOptions = {
@@ -681,6 +699,14 @@ export const sendTicketEmail = async (
         <strong>Location:</strong> Will be communicated 2 weeks before the event
     </p>
     
+    <p style="color: #000; margin-bottom: 15px; text-align: left;">
+        <strong>Ticket ID:</strong> ${data.ticketId}
+    </p>
+    
+    <p style="color: #000; margin-bottom: 30px; text-align: left;">
+        <strong>Payment Reference:</strong> ${data.paymentReference}
+    </p>
+    
     <p style="color: #000; margin-top: 30px; text-align: left;">
         Best regards,<br>
         <strong>The Orà duku Team</strong>
@@ -689,7 +715,7 @@ export const sendTicketEmail = async (
       `,
       attachments: [
         {
-          filename: `ticket-${data.ticketId}.pdf`,
+          filename: `${data.ticketType === 'early_bird' ? 'earlybird' : 'latebird'}-ticket-${data.ticketId}.pdf`,
           content: pdfBuffer,
           contentType: 'application/pdf'
         }
@@ -697,7 +723,7 @@ export const sendTicketEmail = async (
     };
 
     await transporter.sendMail(customerMailOptions);
-    console.log(`✅ Ticket email with HTML design PDF sent to customer: ${data.customerEmail}`);
+    console.log(`✅ Ticket email with ${data.ticketType} PDF sent to customer: ${data.customerEmail}`);
 
     // Send notification emails to admins
     for (const adminEmail of adminEmails) {
