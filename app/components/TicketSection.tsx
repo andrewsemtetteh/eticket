@@ -50,6 +50,11 @@ export default function TicketSection({ initialData }: TicketSectionProps = {}) 
     try {
       // Add timestamp to bypass cache
       const response = await fetch(`/api/settings?t=${Date.now()}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       const data = await response.json();
       console.log('🎫 TicketSection - Settings loaded:', {
         early_bird_mode: data.settings?.early_bird_mode,
@@ -57,12 +62,16 @@ export default function TicketSection({ initialData }: TicketSectionProps = {}) 
         early_bird_end_date: data.settings?.early_bird_end_date,
         early_bird_enabled: data.settings?.early_bird_enabled
       });
-      if (response.ok) {
+      
+      if (data.settings) {
         setSettings(data.settings);
         setStats(data.stats);
+      } else {
+        console.warn('No settings data received');
       }
     } catch (error) {
       console.error('Failed to fetch settings:', error);
+      // Don't update state on error to keep existing data
     } finally {
       setLoading(false);
     }
@@ -74,11 +83,19 @@ export default function TicketSection({ initialData }: TicketSectionProps = {}) 
     await fetchSettings();
   };
 
-  // Auto-refresh every 30 seconds to get latest prices
+  // Auto-refresh every 60 seconds only when page is visible
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchSettings();
-    }, 30000); // 30 seconds
+    const interval = setInterval(async () => {
+      // Only refresh if page is visible (not in background tab)
+      if (document.visibilityState === 'visible') {
+        try {
+          await fetchSettings();
+        } catch (error) {
+          console.error('Auto-refresh failed:', error);
+          // Silently fail auto-refresh to avoid errors in console
+        }
+      }
+    }, 60000); // 60 seconds
 
     return () => clearInterval(interval);
   }, []);

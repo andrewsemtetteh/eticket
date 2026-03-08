@@ -41,11 +41,19 @@ function CheckoutContent() {
     fetchEventSettings();
   }, []);
 
-  // Auto-refresh every 30 seconds to get latest prices
+  // Auto-refresh every 60 seconds only when page is visible
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchEventSettings();
-    }, 30000); // 30 seconds
+    const interval = setInterval(async () => {
+      // Only refresh if page is visible (not in background tab)
+      if (document.visibilityState === 'visible') {
+        try {
+          await fetchEventSettings();
+        } catch (error) {
+          console.error('Auto-refresh failed:', error);
+          // Silently fail auto-refresh to avoid errors in console
+        }
+      }
+    }, 60000); // 60 seconds
 
     return () => clearInterval(interval);
   }, []);
@@ -61,16 +69,26 @@ function CheckoutContent() {
     try {
       // Add timestamp to bypass cache
       const response = await fetch(`/api/settings?t=${Date.now()}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       const data = await response.json();
       
-      if (response.ok) {
+      if (data.settings) {
         setSettings(data.settings);
         setStats(data.stats);
+        setError(null); // Clear any previous errors
       } else {
-        setError(data.error || 'Failed to load event settings');
+        console.warn('No settings data received');
       }
     } catch (err) {
-      setError('Failed to load event settings');
+      console.error('Failed to fetch event settings:', err);
+      // Only set error for manual fetch, not auto-refresh
+      if (loading) {
+        setError('Failed to load event settings');
+      }
     } finally {
       setLoading(false);
     }
