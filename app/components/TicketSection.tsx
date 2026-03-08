@@ -48,7 +48,8 @@ export default function TicketSection({ initialData }: TicketSectionProps = {}) 
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch('/api/settings');
+      // Add timestamp to bypass cache
+      const response = await fetch(`/api/settings?t=${Date.now()}`);
       const data = await response.json();
       console.log('🎫 TicketSection - Settings loaded:', {
         early_bird_mode: data.settings?.early_bird_mode,
@@ -72,6 +73,15 @@ export default function TicketSection({ initialData }: TicketSectionProps = {}) 
     setLoading(true);
     await fetchSettings();
   };
+
+  // Auto-refresh every 30 seconds to get latest prices
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchSettings();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Use the earlyBirdAvailable from stats which already considers early_bird_enabled
   const earlyBirdLeft = stats?.earlyBirdLeft ?? 0;

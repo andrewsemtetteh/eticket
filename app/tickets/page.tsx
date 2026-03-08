@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 // Server-side data fetching
 async function getTicketData() {
   try {
-    // Get event settings
+    // Get event settings (no caching on server-side)
     const { data: settings, error: settingsError } = await supabaseAdmin
       .from('event_settings')
       .select('*')

@@ -41,6 +41,15 @@ function CheckoutContent() {
     fetchEventSettings();
   }, []);
 
+  // Auto-refresh every 30 seconds to get latest prices
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchEventSettings();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Handle Paystack cancel action redirect
   useEffect(() => {
     if (cancelled && cancelledRef) {
@@ -50,7 +59,8 @@ function CheckoutContent() {
 
   const fetchEventSettings = async () => {
     try {
-      const response = await fetch('/api/settings');
+      // Add timestamp to bypass cache
+      const response = await fetch(`/api/settings?t=${Date.now()}`);
       const data = await response.json();
       
       if (response.ok) {

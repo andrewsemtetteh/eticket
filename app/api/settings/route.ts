@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 // Simple in-memory cache (for production, use Redis)
 let cache: any = null;
 let cacheTime = 0;
-const CACHE_DURATION = 30000; // 30 seconds
+const CACHE_DURATION = 5000; // 5 seconds
 
 export async function GET() {
   try {
