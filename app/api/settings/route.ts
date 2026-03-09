@@ -4,20 +4,24 @@ import { supabaseAdmin } from '@/lib/supabase';
 // Simple in-memory cache (for production, use Redis)
 let cache: any = null;
 let cacheTime = 0;
-const CACHE_DURATION = 5000; // 5 seconds
+const CACHE_DURATION = 1000; // 1 second
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Check cache first
+    // Check for cache-busting parameter
+    const { searchParams } = new URL(request.url);
+    const bustCache = searchParams.get('bust') === 'true';
+    
+    // Check cache first (unless cache busting is requested)
     const now = Date.now();
-    if (cache && (now - cacheTime) < CACHE_DURATION) {
-      console.log('� Settings API - Using cache');
+    if (!bustCache && cache && (now - cacheTime) < CACHE_DURATION) {
+      console.log(' Settings API - Using cache');
       return NextResponse.json(cache);
     }
 
-    console.log('🔍 Settings API - Fresh request...');
+    console.log(' Settings API - Fresh request...');
     
-    console.log('⚙️ Settings fetch:', {
+    console.log(' Settings fetch:', {
       hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
       hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
     });

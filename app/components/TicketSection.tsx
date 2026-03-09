@@ -48,8 +48,8 @@ export default function TicketSection({ initialData }: TicketSectionProps = {}) 
 
   const fetchSettings = async () => {
     try {
-      // Add timestamp to bypass cache
-      const response = await fetch(`/api/settings?t=${Date.now()}`);
+      // Add timestamp and cache-busting to bypass cache
+      const response = await fetch(`/api/settings?t=${Date.now()}&bust=true`);
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -83,7 +83,7 @@ export default function TicketSection({ initialData }: TicketSectionProps = {}) 
     await fetchSettings();
   };
 
-  // Auto-refresh every 60 seconds only when page is visible
+  // Auto-refresh every 15 seconds only when page is visible
   useEffect(() => {
     const interval = setInterval(async () => {
       // Only refresh if page is visible (not in background tab)
@@ -95,7 +95,7 @@ export default function TicketSection({ initialData }: TicketSectionProps = {}) 
           // Silently fail auto-refresh to avoid errors in console
         }
       }
-    }, 60000); // 60 seconds
+    }, 15000); // 15 seconds
 
     return () => clearInterval(interval);
   }, []);
