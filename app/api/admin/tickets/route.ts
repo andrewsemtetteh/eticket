@@ -72,6 +72,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Update ticket status
     const { data: ticket, error } = await supabaseAdmin
       .from('tickets')
       .update({ status })
@@ -81,6 +82,19 @@ export async function PUT(request: NextRequest) {
 
     if (error) {
       throw error;
+    }
+
+    // Invalidate settings cache since ticket stats affect availability
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'invalidate-cache' })
+      });
+      
+      console.log('🎫 Admin ticket update - Cache invalidated due to status change');
+    } catch (cacheError) {
+      console.warn('⚠️ Failed to invalidate cache after ticket update:', cacheError);
     }
 
     return NextResponse.json({ ticket });

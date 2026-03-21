@@ -60,12 +60,19 @@ export default function TicketSection({ initialData }: TicketSectionProps = {}) 
         early_bird_mode: data.settings?.early_bird_mode,
         early_bird_limit: data.settings?.early_bird_limit,
         early_bird_end_date: data.settings?.early_bird_end_date,
-        early_bird_enabled: data.settings?.early_bird_enabled
+        early_bird_enabled: data.settings?.early_bird_enabled,
+        earlyBirdAvailable: data.stats?.earlyBirdAvailable,
+        earlyBirdLeft: data.stats?.earlyBirdLeft
       });
       
       if (data.settings) {
         setSettings(data.settings);
         setStats(data.stats);
+        
+        // Dispatch event to notify other components
+        window.dispatchEvent(new CustomEvent('ticket-data-updated', {
+          detail: { settings: data.settings, stats: data.stats }
+        }));
       } else {
         console.warn('No settings data received');
       }
@@ -83,7 +90,7 @@ export default function TicketSection({ initialData }: TicketSectionProps = {}) 
     await fetchSettings();
   };
 
-  // Auto-refresh every 15 seconds only when page is visible
+  // Auto-refresh every 5 seconds only when page is visible, and faster after admin changes
   useEffect(() => {
     const interval = setInterval(async () => {
       // Only refresh if page is visible (not in background tab)
@@ -95,9 +102,24 @@ export default function TicketSection({ initialData }: TicketSectionProps = {}) 
           // Silently fail auto-refresh to avoid errors in console
         }
       }
-    }, 15000); // 15 seconds
+    }, 5000); // Reduced to 5 seconds for better responsiveness
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Listen for admin update events
+  useEffect(() => {
+    const handleAdminUpdate = () => {
+      console.log('🔄 TicketSection - Admin update detected, refreshing data');
+      fetchSettings();
+    };
+
+    // Listen for custom events from admin dashboard
+    window.addEventListener('admin-settings-updated', handleAdminUpdate);
+    
+    return () => {
+      window.removeEventListener('admin-settings-updated', handleAdminUpdate);
+    };
   }, []);
 
   // Use the earlyBirdAvailable from stats which already considers early_bird_enabled

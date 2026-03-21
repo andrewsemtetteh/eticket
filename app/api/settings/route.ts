@@ -4,7 +4,20 @@ import { supabaseAdmin } from '@/lib/supabase';
 // Simple in-memory cache (for production, use Redis)
 let cache: any = null;
 let cacheTime = 0;
-const CACHE_DURATION = 1000; // 1 second
+const CACHE_DURATION = 5000; // 5 seconds - reduced for better responsiveness
+
+// Global cache management
+export const clearSettingsCache = () => {
+  cache = null;
+  cacheTime = 0;
+  console.log('📋 Settings cache cleared globally');
+};
+
+// Cache invalidation endpoint
+export async function invalidateCache() {
+  clearSettingsCache();
+  return { success: true, message: 'Cache invalidated' };
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -101,8 +114,7 @@ export async function PUT(request: NextRequest) {
     const updates = await request.json();
     
     // Clear cache when settings are updated
-    cache = null;
-    cacheTime = 0;
+    clearSettingsCache();
     console.log('📋 Settings API - Cache cleared due to update');
     console.log('🔧 Settings PUT - Received updates:', updates);
 
@@ -140,6 +152,21 @@ export async function PUT(request: NextRequest) {
 
   } catch (error) {
     console.error('Settings update error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const { action } = await request.json();
+    
+    if (action === 'invalidate-cache') {
+      return NextResponse.json(invalidateCache());
+    }
+    
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+  } catch (error) {
+    console.error('Settings POST error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

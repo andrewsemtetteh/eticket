@@ -234,6 +234,19 @@ export default function AdminTicketsPage() {
         throw new Error('Failed to save setting');
       }
 
+      // Invalidate cache across all instances
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'invalidate-cache' })
+      });
+
+      // Dispatch event to notify all client instances
+      window.dispatchEvent(new CustomEvent('admin-settings-updated', {
+        detail: { field, updateData }
+      }));
+
+      console.log('🔧 Admin dashboard - Settings updated and cache invalidated');
       setEditingField(null);
     } catch (error) {
       console.error('Save error:', error);
@@ -281,6 +294,20 @@ export default function AdminTicketsPage() {
         if (!response.ok) {
           throw new Error('Failed to save setting');
         }
+
+        // Invalidate cache across all instances
+        await fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'invalidate-cache' })
+        });
+
+        // Dispatch event to notify all client instances
+        window.dispatchEvent(new CustomEvent('admin-settings-updated', {
+          detail: { field, value }
+        }));
+
+        console.log('🔧 Admin dashboard - Toggle updated and cache invalidated');
       }
     } catch (error) {
       console.error('Toggle save error:', error);
@@ -300,6 +327,20 @@ export default function AdminTicketsPage() {
       if (!response.ok) {
         throw new Error('Failed to save setting');
       }
+
+      // Invalidate cache across all instances
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'invalidate-cache' })
+      });
+
+      // Dispatch event to notify all client instances
+      window.dispatchEvent(new CustomEvent('admin-settings-updated', {
+        detail: { field: 'earlyBirdMode', value }
+      }));
+
+      console.log('🔧 Admin dashboard - Mode updated and cache invalidated');
     } catch (error) {
       console.error('Mode save error:', error);
       setError(error instanceof Error ? error.message : 'Failed to save');
